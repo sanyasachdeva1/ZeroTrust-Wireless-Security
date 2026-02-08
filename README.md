@@ -72,7 +72,7 @@ to validate end-to-end detection, trust evaluation, and response.
 python3 run_lab.py
 
 ### Observed Output
-![Project Demo](assets/demo.png) 
+![Project Demo](assets/demo1.png) 
 
 This output demonstrates:
 - Real detection of a wireless deauthentication event
