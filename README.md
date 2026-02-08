@@ -18,7 +18,7 @@ As an SME in WiFi 7 and 5G, I developed this engine to bridge the gap between tr
 3. **Response:** If the `TrustScore` falls below the threshold, the `block_malicious_actor` module triggers an alert.
 
 ## 📸 Demo
-![Project Demo](assets/your_screenshot_name.png) ## 🛠️ Installation & Usage
+![Project Demo](assets/demo.png) ## 🛠️ Installation & Usage
 ```bash
 # Clone the repo
 git clone [https://github.com/sanyasachdeva1/ZeroTrust-Wireless-Security.git](https://github.com/sanyasachdeva1/ZeroTrust-Wireless-Security.git)
