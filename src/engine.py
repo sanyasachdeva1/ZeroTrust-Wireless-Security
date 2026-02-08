@@ -11,7 +11,7 @@ logging.basicConfig(
 )
 
 class ZeroTrustWireless:
-    def __init__(self, config_path='authorized_devices.json'):
+    def __init__(self, config_path='config/authorized_devices.json'):
         self.load_config(config_path)
         print(f"[*] Zero Trust Engine Active. Monitoring {len(self.authorized_macs)} devices.")
 
