@@ -21,28 +21,21 @@ SOC and Zero Trust environments.
 ---
 
 ## Architecture Overview
-
 The system follows a complete blue-team security pipeline:
-
 1. **Packet Capture**  
    Wireless frames are captured and inspected in real time.
-
 2. **Attack Detection**  
    802.11 management frames are analyzed to identify deauthentication attacks.
-
 3. **Zero Trust Evaluation**  
    Each device maintains a dynamic trust score that degrades on malicious behavior.
-
 4. **Automated Response**  
    Devices that breach trust thresholds are automatically isolated.
-
 5. **Centralized Logging**  
    Security events are logged in a SIEM-compatible format for monitoring and analysis.
 
 ---
 
 ## MITRE ATT&CK Mapping
-
 | Attack Type                  | Technique ID | Description                               |
 |-----------------------------|--------------|-------------------------------------------|
 | Deauthentication Attack     | T1040        | Network Sniffing / Traffic Interception   |
@@ -68,23 +61,17 @@ The system follows a complete blue-team security pipeline:
 
 ---
 
-## Project Structure
+## Running the Lab (optional)
+1. Install dependencies:
+   `pip install -r requirements.txt`
 
-ZeroTrust-Wireless-Security/
-├── src/
-│ ├── packet_sniffer.py
-│ ├── attack_detector.py
-│ ├── trust_engine.py
-│ ├── response_engine.py
-│ └── logger.py
-├── config/
-│ └── trusted_devices.json
-├── attacks/
-│ └── simulate_deauth.py
-├── logs/
-│ └── (ignored at runtime)
-├── requirements.txt
-└── README.md
+2. Put your wireless interface in monitor mode:
+   `sudo airmon-ng start wlan0`
+
+3. Run the sniffer:
+   `sudo python3 src/packet_sniffer.py`
+
+---
 
 ## Disclaimer
 
