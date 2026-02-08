@@ -1,0 +1,20 @@
+{
+    "version": "1.0",
+    "description": "Zero Trust Trusted Asset Database",
+    "authorized_macs": {
+        "00:11:22:33:44:55": {
+            "device_name": "Corporate_Laptop_01",
+            "owner": "Sanya",
+            "trust_level": "High"
+        },
+        "AA:BB:CC:DD:EE:FF": {
+            "device_name": "Cisco_AP_WiFi7",
+            "owner": "Infrastructure",
+            "trust_level": "Critical"
+        }
+    },
+    "security_settings": {
+        "alert_threshold": 3,
+        "auto_block": true
+    }
+}
