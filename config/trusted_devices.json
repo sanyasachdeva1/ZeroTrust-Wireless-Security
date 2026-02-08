@@ -1,0 +1,15 @@
+{
+  "trusted_devices": [
+    {
+      "mac": "AA:BB:CC:DD:EE:01",
+      "owner": "Employee-Laptop",
+      "trust_score": 100
+    },
+    {
+      "mac": "AA:BB:CC:DD:EE:02",
+      "owner": "Corporate-Mobile",
+      "trust_score": 100
+    }
+  ]
+}
+
