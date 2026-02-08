@@ -1,34 +1,56 @@
-from scapy.all import *
+import json
 import logging
-from datetime import datetime
+import os
+from scapy.all import *
 
-# Setup logging for Grafana/Dashboard integration
-logging.basicConfig(filename='threat_log.csv', level=logging.INFO, 
-                    format='%(asctime)s,%(message)s')
+# 1. Setup Advanced Logging
+logging.basicConfig(
+    filename='security_audit.log',
+    level=logging.INFO,
+    format='%(asctime)s - [RISK: %(levelname)s] - %(message)s'
+)
 
-class ZeroTrustEngine:
-    def __init__(self):
-        self.authorized_macs = ["00:11:22:33:44:55"] # Add your known device MACs
-        print("[*] Zero Trust Engine Started. Monitoring Wireless Perimeter...")
+class ZeroTrustWireless:
+    def __init__(self, config_path='authorized_devices.json'):
+        self.load_config(config_path)
+        print(f"[*] Zero Trust Engine Active. Monitoring {len(self.authorized_macs)} devices.")
 
-    def packet_callback(self, pkt):
-        # 1. Detect De-authentication Attacks (IDS Feature)
+    def load_config(self, path):
+        with open(path, 'r') as f:
+            config = json.load(f)
+            self.authorized_macs = config['authorized_macs']
+            self.auto_block = config['security_settings']['auto_block']
+
+    def block_malicious_actor(self, mac):
+        """Simulates an automated SOAR response to isolate a threat."""
+        if self.auto_block:
+            # On Linux, this would execute a firewall block
+            # os.system(f"iptables -A INPUT -m mac --mac-source {mac} -j DROP")
+            print(f"[ACTION] Automated Response: MAC {mac} has been blacklisted in Firewall.")
+            logging.warning(f"BLOCK_ACTION_TRIGGERED: {mac}")
+
+    def process_packet(self, pkt):
+        # Check for De-authentication (DoS) attacks
         if pkt.haslayer(Dot11Deauth):
-            addr1 = pkt.addr1  # Receiver
-            addr2 = pkt.addr2  # Sender (usually AP)
-            reason = pkt.getlayer(Dot11Deauth).reason
-            msg = f"DEAUTH_DETECTED,Target:{addr1},Source:{addr2},Reason:{reason},TrustScore:0"
-            print(f"[!] ALERT: {msg}")
-            logging.info(msg)
+            source = pkt.addr2
+            target = pkt.addr1
+            print(f"[!] THREAT: Deauth Flood detected from {source} targeting {target}")
+            logging.error(f"DEAUTH_ATTACK: Source={source}, Target={target}")
+            self.block_malicious_actor(source)
 
-        # 2. Identify Unauthorized Devices (Zero Trust Feature)
+        # Check for Unauthorized Access (Zero Trust Violation)
         elif pkt.haslayer(Dot11):
             source_mac = pkt.addr2
-            if source_mac and source_mac not in self.authorized_macs:
-                # Assign low trust score to unknown devices
-                msg = f"UNAUTHORIZED_DEVICE,MAC:{source_mac},Action:Flagged,TrustScore:20"
-                logging.info(msg)
+            if source_mac and source_mac.upper() not in self.authorized_macs:
+                if source_mac not in ["ff:ff:ff:ff:ff:ff", None]: # Ignore broadcasts
+                    print(f"[?] UNKNOWN DEVICE: {source_mac} is attempting to communicate.")
+                    logging.info(f"UNAUTHORIZED_MAC_DETECTED: {source_mac}")
+                    # Optional: block unknown devices immediately (Strict Zero Trust)
+                    # self.block_malicious_actor(source_mac)
 
-# Start sniffing (requires Monitor Mode: sudo airmon-ng start wlan0)
-engine = ZeroTrustEngine()
-sniff(iface="wlan0mon", prn=engine.packet_callback, store=0)
+# Start the Engine
+if __name__ == "__main__":
+    # Ensure you are running as sudo/root for packet capture
+    engine = ZeroTrustWireless()
+    # Replace 'wlan0mon' with your actual monitor-mode interface
+    sniff(iface="wlan0mon", prn=engine.process_packet, store=0)
