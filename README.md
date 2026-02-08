@@ -82,6 +82,18 @@ This output demonstrates:
 
 ---
 
+## Running the Lab 
+1. Install dependencies:
+   pip install -r requirements.txt
+2. Run the lab simulation:
+   python3 run_lab.py
+3. View generated alerts:
+   cat logs/alerts.log
+> ⚠️ Only run in monitor mode on networks you own.
+
+
+---
+
 ## Disclaimer
 
 This project is designed for educational and defensive security purposes only.
