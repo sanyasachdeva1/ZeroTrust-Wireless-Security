@@ -2,6 +2,8 @@ import json
 import logging
 import os
 from scapy.all import *
+conf.use_pcap = True
+conf.sniff_promisc = True 
 
 # 1. Setup Advanced Logging
 logging.basicConfig(
@@ -57,8 +59,7 @@ if __name__ == "__main__":
         # iface="en0": Most Macs use en0 for Wi-Fi. 
         # monitor=True: This is the critical flag for Scapy on macOS to capture raw 802.11 frames.
         print("[*] Initializing Monitor Mode on en0... (Press Ctrl+C to stop)")
-        
-        sniff(iface="en0", prn=engine.process_packet, monitor=True, store=0)
+        sniff(iface="en0", prn=engine.process_packet, store=0)
         
     except PermissionError:
         print("[!] Error: You must run this script with 'sudo'.")
