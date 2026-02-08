@@ -1,30 +1,95 @@
-# Zero Trust Wireless Security Engine (802.11)
+# Wireless Zero Trust Threat Detection & Response Lab
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+This project implements a Python-based wireless security lab that applies **Zero Trust principles**
+to detect, evaluate, and respond to malicious activity in **802.11 (Wi-Fi) networks**.
 
-## 🛡️ Project Overview
-As an SME in WiFi 7 and 5G, I developed this engine to bridge the gap between traditional wireless connectivity and **Zero Trust Architecture (ZTA)**. This tool moves beyond perimeter-based security by implementing per-packet inspection and automated identity verification at the Data Link Layer.
+The system demonstrates how modern enterprise wireless security combines **identity-based trust,
+continuous verification, threat detection, and automated incident response**, similar to real-world
+SOC and Zero Trust environments.
 
-## 🚀 Key Features
-- **Dynamic Identity Verification:** Utilizes a JSON-based "Source of Truth" to validate device MAC addresses in real-time.
-- **Automated Threat Mitigation:** Includes a SOAR-inspired module that simulates immediate firewall blacklisting (iptables) upon detection of De-authentication attacks.
-- **Wireless Forensic Logging:** Generates audit-ready logs for ingestion into SIEM tools like Splunk or Grafana.
-- **Protocol Depth:** Targeted detection for Layer 2 vulnerabilities, specifically unauthorized SSID association and management frame manipulation.
+---
 
-## 🏗️ System Architecture
-1. **Ingestion:** Scapy sniffer captures 802.11 management frames in monitor mode.
-2. **Analysis:** Logic engine compares frame metadata against `authorized_devices.json`.
-3. **Response:** If the `TrustScore` falls below the threshold, the `block_malicious_actor` module triggers an alert.
+## Key Features
 
-## 📸 Demo
-![Project Demo](assets/demo.png) ## 🛠️ Installation & Usage
-```bash
-# Clone the repo
-git clone [https://github.com/sanyasachdeva1/ZeroTrust-Wireless-Security.git](https://github.com/sanyasachdeva1/ZeroTrust-Wireless-Security.git)
+- Real-time 802.11 wireless packet inspection using **Scapy**
+- **Identity-first Zero Trust model** with dynamic trust scoring per device
+- Detection of **wireless deauthentication attacks**
+- Threat detection mapped to the **MITRE ATT&CK framework**
+- **Automated SOAR-style incident response** for compromised devices
+- **SIEM-compatible security logging** for SOC visibility
 
-# Install dependencies
-pip install -r requirements.txt
+---
 
-# Run in monitor mode (Requires Root)
-sudo python3 src/engine.py
+## Architecture Overview
+
+The system follows a complete blue-team security pipeline:
+
+1. **Packet Capture**  
+   Wireless frames are captured and inspected in real time.
+
+2. **Attack Detection**  
+   802.11 management frames are analyzed to identify deauthentication attacks.
+
+3. **Zero Trust Evaluation**  
+   Each device maintains a dynamic trust score that degrades on malicious behavior.
+
+4. **Automated Response**  
+   Devices that breach trust thresholds are automatically isolated.
+
+5. **Centralized Logging**  
+   Security events are logged in a SIEM-compatible format for monitoring and analysis.
+
+---
+
+## MITRE ATT&CK Mapping
+
+| Attack Type                  | Technique ID | Description                               |
+|-----------------------------|--------------|-------------------------------------------|
+| Deauthentication Attack     | T1040        | Network Sniffing / Traffic Interception   |
+
+---
+
+## Use Cases
+
+- Enterprise wireless intrusion detection
+- Zero Trust enforcement in Wi-Fi networks
+- SOC analyst training and blue-team simulations
+- Security automation and incident response demonstrations
+
+---
+
+## Technologies Used
+
+- Python
+- Scapy
+- Zero Trust Architecture
+- MITRE ATT&CK Framework
+- SIEM / SOC Logging Concepts
+
+---
+
+## Project Structure
+
+ZeroTrust-Wireless-Security/
+├── src/
+│ ├── packet_sniffer.py
+│ ├── attack_detector.py
+│ ├── trust_engine.py
+│ ├── response_engine.py
+│ └── logger.py
+├── config/
+│ └── trusted_devices.json
+├── attacks/
+│ └── simulate_deauth.py
+├── logs/
+│ └── (ignored at runtime)
+├── requirements.txt
+└── README.md
+
+## Disclaimer
+
+This project is designed for educational and defensive security purposes only.
+Attack simulations are non-destructive and do not transmit real malicious traffic.
+
+
+
