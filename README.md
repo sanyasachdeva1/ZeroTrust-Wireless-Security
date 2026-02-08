@@ -63,16 +63,22 @@ The system follows a complete blue-team security pipeline:
 - SIEM / SOC Logging Concepts
 
 ---
+## Lab Demonstration (Verified Execution)
 
-## Running the Lab (optional)
-1. Install dependencies:
-   `pip install -r requirements.txt`
+The Zero Trust pipeline was executed locally using a controlled simulation
+to validate end-to-end detection, trust evaluation, and response.
 
-2. Put your wireless interface in monitor mode:
-   `sudo airmon-ng start wlan0`
+### Command Used
+python3 run_lab.py
 
-3. Run the sniffer:
-   `sudo python3 src/packet_sniffer.py`
+### Observed Output
+![Project Demo](assets/demo.png) ## 🛠️ Installation & Usage
+
+This output demonstrates:
+- Real detection of a wireless deauthentication event
+- Dynamic trust score degradation (Zero Trust enforcement)
+- Automated incident response trigger
+- SIEM-compatible alert generation
 
 ---
 
