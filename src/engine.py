@@ -48,9 +48,19 @@ class ZeroTrustWireless:
                     # Optional: block unknown devices immediately (Strict Zero Trust)
                     # self.block_malicious_actor(source_mac)
 
-# Start the Engine
 if __name__ == "__main__":
-    # Ensure you are running as sudo/root for packet capture
-    engine = ZeroTrustWireless()
-    # Replace 'wlan0mon' with your actual monitor-mode interface
-    sniff(iface="wlan0mon", prn=engine.process_packet, store=0)
+    # Ensure you are running as sudo for packet capture permissions
+    try:
+        engine = ZeroTrustWireless()
+        
+        # MAC-SPECIFIC SNIFF:
+        # iface="en0": Most Macs use en0 for Wi-Fi. 
+        # monitor=True: This is the critical flag for Scapy on macOS to capture raw 802.11 frames.
+        print("[*] Initializing Monitor Mode on en0... (Press Ctrl+C to stop)")
+        
+        sniff(iface="en0", prn=engine.process_packet, monitor=True, store=0)
+        
+    except PermissionError:
+        print("[!] Error: You must run this script with 'sudo'.")
+    except Exception as e:
+        print(f"[!] An error occurred: {e}")
