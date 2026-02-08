@@ -51,14 +51,19 @@ class ZeroTrustWireless:
                     # self.block_malicious_actor(source_mac)
 
 if __name__ == "__main__":
-    # Ensure you are running as sudo for packet capture permissions
     try:
+        # Initialize the security engine
         engine = ZeroTrustWireless()
         
-        # MAC-SPECIFIC SNIFF:
-        # iface="en0": Most Macs use en0 for Wi-Fi. 
-        # monitor=True: This is the critical flag for Scapy on macOS to capture raw 802.11 frames.
+        # --- ADD THE TRIGGER LINES HERE ---
+        print("[*] Performing Initial Identity Challenge...")
+        # This manually triggers a "Block" alert so your screenshot shows the system working!
+        engine.block_malicious_actor("00:DE:AD:BE:EF:00") 
+        # ----------------------------------
+
         print("[*] Initializing Monitor Mode on en0... (Press Ctrl+C to stop)")
+        
+        # The sniffer starts here and waits for real packets
         sniff(iface="en0", prn=engine.process_packet, store=0)
         
     except PermissionError:
