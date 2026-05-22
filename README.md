@@ -24,24 +24,30 @@ SOC and Zero Trust environments.
 ---
 
 ## Architecture Overview
-The system follows a complete blue-team security pipeline:
-1. **Packet Capture**  
-   Wireless frames are captured and inspected in real time.
-2. **Attack Detection**  
-   802.11 management frames are analyzed to identify deauthentication attacks.
-3. **Zero Trust Evaluation**  
-   Each device maintains a dynamic trust score that degrades on malicious behavior.
-4. **Automated Response**  
-   Devices that breach trust thresholds are automatically isolated.
-5. **Centralized Logging**  
-   Security events are logged in a SIEM-compatible format for monitoring and analysis.
+
+````md
+```mermaid
+flowchart LR
+    A[Simulated 802.11 Packet] --> B[Attack Detector]
+    B --> C[Deauth Detection]
+    C --> D[SOC-style Alert Logging]
+    C --> E[Zero Trust Evaluation]
+    E --> F[Trust Score Reduction]
+    F --> G{Below Trust Threshold?}
+    G -->|Yes| H[Simulated Device Isolation]
+    G -->|No| I[Continue Monitoring]
+    H --> J[logs/alerts.log]
+    D --> J
 
 ---
 
 ## MITRE ATT&CK Mapping
-| Attack Type                  | Technique ID | Description                               |
-|-----------------------------|--------------|-------------------------------------------|
-| Deauthentication Attack     | T1040        | Network Sniffing / Traffic Interception   |
+
+| Detection | Tactic / Concept | Why it matters |
+|---|---|---|
+| 802.11 Deauthentication Attack | Impact / Network Denial of Service concept | Deauth frames can force wireless clients to disconnect and disrupt availability |
+| Unknown Wireless Device | Initial Access / Rogue Device concept | Unknown devices violate identity-based trust assumptions |
+| Trust Score Degradation | Continuous Verification Failure | Repeated suspicious behavior lowers device trust and can trigger response |
 
 ---
 
@@ -63,36 +69,21 @@ The system follows a complete blue-team security pipeline:
 - SIEM / SOC Logging Concepts
 
 ---
-## Lab Demonstration (Verified Execution)
+## Lab Demonstration
 
-The Zero Trust pipeline was executed locally using a controlled simulation
-to validate end-to-end detection, trust evaluation, and response.
+The Zero Trust pipeline can be executed locally using a safe Scapy-based simulation.  
+The simulation does not transmit real wireless attack traffic. It creates an in-memory 802.11 deauthentication packet and sends it through the detection pipeline.
 
-### Command Used
-python3 run_lab.py
+## Running the Lab
 
-### Observed Output
-![Project Demo](assets/demo1.png) 
+### 1. Clone the repository
 
-This output demonstrates:
-- Real detection of a wireless deauthentication event
-- Dynamic trust score degradation (Zero Trust enforcement)
-- Automated incident response trigger
-- SIEM-compatible alert generation
+```bash
+git clone https://github.com/sanyasachdeva1/ZeroTrust-Wireless-Security.git
+cd ZeroTrust-Wireless-Security
+pip install -r requirements.txt
+sudo python3 src/engine.py
 
----
-
-## Running the Lab 
-1. Install dependencies:
-   pip install -r requirements.txt
-2. Run the lab simulation:
-   python3 run_lab.py
-3. View generated alerts:
-   cat logs/alerts.log
-> ⚠️ Only run in monitor mode on networks you own.
-
-
----
 
 ## Disclaimer
 

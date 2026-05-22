@@ -1,15 +1,21 @@
 {
+  "security_settings": {
+    "trust_threshold": 50,
+    "trust_penalty": 30,
+    "auto_isolate": true
+  },
   "trusted_devices": [
     {
       "mac": "AA:BB:CC:DD:EE:01",
       "owner": "Employee-Laptop",
+      "device_type": "Corporate Laptop",
       "trust_score": 100
     },
     {
       "mac": "AA:BB:CC:DD:EE:02",
       "owner": "Corporate-Mobile",
+      "device_type": "Managed Mobile",
       "trust_score": 100
     }
   ]
 }
-
