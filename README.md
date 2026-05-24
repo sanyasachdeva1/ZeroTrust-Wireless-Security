@@ -11,12 +11,17 @@ The lab demonstrates how enterprise wireless security can combine **identity-bas
 
 ## Key Features
 
-- Safe local simulation of 802.11 deauthentication activity using **Scapy**
-- Detection of suspicious wireless management frame behavior
+- Safe local simulation of wireless attack scenarios using Scapy
+- Detection of 802.11 deauthentication flood activity
+- Unknown MAC detection using trusted device inventory
+- Evil Twin SSID detection using trusted SSID/BSSID mapping
+- Beacon flood detection using rate-based thresholds
 - Identity-first Zero Trust model with dynamic trust scoring
-- Trust score reduction for suspicious devices
-- Simulated device isolation when trust falls below threshold
+- Simulated NAC quarantine and firewall block response
 - SOC-style alert logging in `logs/alerts.log`
+- Structured JSONL alert generation in `logs/alerts.jsonl`
+- Optional PCAP analysis using `src/pcap_analyzer.py`
+- Basic tests and GitHub Actions CI workflow
 
 ---
 
@@ -130,6 +135,7 @@ python3 run_lab.py
 
 ```bash
 cat logs/alerts.log
+cat logs/alerts.jsonl
 ```
 
 ### Optional: Run the attack simulation directly
@@ -137,6 +143,14 @@ cat logs/alerts.log
 ```bash
 python3 attacks/simulate_deauth.py
 ```
+
+```md
+## Optional: Analyze a PCAP File
+
+The project also supports offline packet analysis using Scapy’s `rdpcap`.
+
+```bash
+python3 src/pcap_analyzer.py --pcap sample-data/wireless_sample.pcap
 
 ---
 
