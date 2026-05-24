@@ -122,19 +122,37 @@ python3 run_lab.py
 
 ### Observed Output
 
-![Project Demo](assets/demo1.png)
+![Project Demo](assets/demo.png)
+![Project Demo](assets/demo2.png)
 
-This output demonstrates:
+The latest demo run shows the complete wireless detection and response workflow:
 
-- Safe simulation of wireless attack scenarios
 - Deauthentication flood detection
 - Unknown MAC detection
 - Evil Twin SSID detection
 - Beacon flood detection
-- Trust score reduction for suspicious behavior
+- Trust score reduction based on suspicious behavior
 - Simulated NAC quarantine and firewall block response
 - SOC-style alert generation in `logs/alerts.log`
-- Structured JSON alert generation in `logs/alerts.jsonl`
+- Structured JSONL alert generation in `logs/alerts.jsonl`
+
+  ### Sample SOC Alert
+
+```text
+Severity=HIGH | Threat=Wireless Deauthentication Flood | MAC=AA:BB:CC:DD:EE:01 | MITRE=Impact / Network DoS concept | Action=Threshold exceeded
+```
+
+### Sample JSONL Alert
+
+```json
+{
+  "severity": "HIGH",
+  "threat": "Wireless Deauthentication Flood",
+  "mac": "AA:BB:CC:DD:EE:01",
+  "mitre_technique": "Impact / Network DoS concept",
+  "action": "Threshold exceeded"
+}
+```
 
 ---
 
