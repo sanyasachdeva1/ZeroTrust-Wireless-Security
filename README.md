@@ -176,6 +176,7 @@ cat logs/alerts.jsonl
 ```bash
 cat sample-output/alerts_sample.log
 cat sample-output/alerts_sample.jsonl
+```
 
 ---
 
@@ -224,8 +225,6 @@ reports/sample_incident_report.md
 The report documents a simulated wireless deauthentication flood, Zero Trust trust-score decisioning, and simulated containment actions.
 
 ---
-
-````md
 ## Detection Logic Documentation
 
 Detailed detection logic, false positive notes, and tuning guidance are available at:
