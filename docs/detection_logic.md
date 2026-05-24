@@ -1,40 +1,33 @@
 # Detection Logic
 
-This document explains the detection rules used by the Wireless Zero Trust Detection & Response Lab.
+The lab uses simple, configurable detection rules. Thresholds, severities, and cooldowns are stored in `config/detection_rules.json`.
 
-## Detection Summary
+| Detection | Signal | Default Rule | Notes |
+|---|---|---|---|
+| Deauth flood | Repeated deauth frames from one source MAC | 5 events in 60 seconds | Reduces trust score and can trigger simulated isolation |
+| Unknown MAC | Source MAC not in trusted inventory | Immediate | Cooldown prevents duplicate alert bursts |
+| Evil twin | Trusted SSID from an untrusted BSSID | Immediate | Trusted SSIDs can list multiple valid BSSIDs |
+| Beacon flood | Repeated beacon frames from one BSSID | 10 events in 60 seconds | Cooldown prevents repeated alerts after threshold |
+| Probe request | Probe request frame observed | Immediate | Low severity visibility signal |
 
-| Detection | Signal Used | Threshold | Severity | Response |
-|---|---|---|---|---|
-| Deauthentication Flood | Repeated 802.11 deauth frames from same MAC | 5 events / 60 seconds | High | Reduce trust score and trigger containment if below threshold |
-| Unknown MAC | Source MAC not present in trusted inventory | Immediate | High | Generate Zero Trust violation alert |
-| Evil Twin SSID | Trusted SSID observed from untrusted BSSID | Immediate | High | Generate rogue AP alert |
-| Beacon Flood | Repeated beacon frames from same BSSID | 10 events / 60 seconds | Medium | Generate wireless DoS alert |
-| Probe Request | Probe request frame observed | Immediate | Low | Log wireless discovery activity |
+## Tuning
 
----
+Use `config/detection_rules.json` to adjust:
 
-## 1. Deauthentication Flood Detection
+- `threshold`
+- `window_seconds`
+- `cooldown_seconds`
+- `severity`
+- `enabled`
 
-### Signal
-The engine observes 802.11 deauthentication frames.
+Use `config/trusted_devices.json` to adjust:
 
-### Logic
-If the same source MAC sends 5 or more deauthentication frames within 60 seconds, the event is treated as a deauthentication flood.
+- trusted device MACs
+- trusted SSID/BSSID mappings
+- trust score threshold
+- trust penalty
+- simulated isolation behavior
 
-### Why it matters
-Deauthentication floods can disrupt wireless availability by forcing clients to disconnect from the network.
+## Limitations
 
-### False positives
-Possible false positives include:
-
-- Wireless driver instability
-- AP roaming behavior
-- Lab-generated traffic
-- Misconfigured wireless clients
-
-### Tuning notes
-The threshold can be tuned in:
-
-```bash
-config/detection_rules.json
+This is a lab detector. MAC addresses can be spoofed, thresholds can miss slow attacks, and real environments should combine packet logic with wireless controller telemetry, NAC identity, SIEM correlation, and RF context.

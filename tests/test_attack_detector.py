@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -8,11 +9,7 @@ from attack_detector import analyze_packet
 
 
 def test_deauth_flood_generates_alert():
-    Path("logs").mkdir(exist_ok=True)
-    Path("logs/alerts.log").write_text("")
-    Path("logs/alerts.jsonl").write_text("")
-
-    for _ in range(5):
+    for _ in range(7):
         packet = (
             RadioTap()
             / Dot11(
@@ -27,6 +24,7 @@ def test_deauth_flood_generates_alert():
 
         analyze_packet(packet)
 
-    log_content = Path("logs/alerts.log").read_text()
+    log_content = Path(os.environ["ZT_LOG_DIR"], "alerts.log").read_text()
 
     assert "Wireless Deauthentication Flood" in log_content
+    assert log_content.count("Wireless Deauthentication Flood") == 1

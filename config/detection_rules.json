@@ -3,6 +3,7 @@
     "enabled": true,
     "threshold": 5,
     "window_seconds": 60,
+    "cooldown_seconds": 60,
     "severity": "HIGH",
     "mitre_technique": "Impact / Network DoS concept"
   },
@@ -10,16 +11,19 @@
     "enabled": true,
     "threshold": 10,
     "window_seconds": 60,
+    "cooldown_seconds": 60,
     "severity": "MEDIUM",
     "mitre_technique": "Impact / Wireless DoS concept"
   },
   "unknown_mac": {
     "enabled": true,
+    "cooldown_seconds": 60,
     "severity": "HIGH",
     "mitre_technique": "Initial Access / Rogue Device concept"
   },
   "evil_twin": {
     "enabled": true,
+    "cooldown_seconds": 60,
     "severity": "HIGH",
     "mitre_technique": "Credential Access / Rogue AP concept"
   },

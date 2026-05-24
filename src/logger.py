@@ -1,15 +1,27 @@
 import json
-from datetime import datetime, UTC
+import os
+from datetime import UTC, datetime
 from pathlib import Path
 
 
-LOG_DIR = Path("logs")
-SOC_LOG_FILE = LOG_DIR / "alerts.log"
-JSON_ALERT_FILE = LOG_DIR / "alerts.jsonl"
+DEFAULT_LOG_DIR = Path("logs")
+
+
+def _log_dir():
+    return Path(os.environ.get("ZT_LOG_DIR", DEFAULT_LOG_DIR))
+
+
+def _soc_log_file():
+    return _log_dir() / "alerts.log"
+
+
+def _json_alert_file():
+    return _log_dir() / "alerts.jsonl"
 
 
 def _timestamp():
-	return datetime.now(UTC).isoformat()
+    return datetime.now(UTC).isoformat()
+
 
 def log_alert(
     threat,
@@ -23,7 +35,8 @@ def log_alert(
     Write both SOC-style text logs and structured JSON alerts.
     """
 
-    LOG_DIR.mkdir(exist_ok=True)
+    log_dir = _log_dir()
+    log_dir.mkdir(exist_ok=True)
 
     alert = {
         "timestamp": _timestamp(),
@@ -44,10 +57,10 @@ def log_alert(
         f"Action={alert['action']}\n"
     )
 
-    with open(SOC_LOG_FILE, "a") as log_file:
+    with open(_soc_log_file(), "a") as log_file:
         log_file.write(soc_log_entry)
 
-    with open(JSON_ALERT_FILE, "a") as json_file:
+    with open(_json_alert_file(), "a") as json_file:
         json_file.write(json.dumps(alert) + "\n")
 
     print(f"[ALERT] {soc_log_entry.strip()}")

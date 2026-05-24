@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import sys
@@ -9,9 +10,6 @@ from logger import log_alert
 
 
 def test_json_alert_is_written():
-    Path("logs").mkdir(exist_ok=True)
-    Path("logs/alerts.jsonl").write_text("")
-
     log_alert(
         threat="Test Alert",
         mac="AA:BB:CC:DD:EE:01",
@@ -19,7 +17,7 @@ def test_json_alert_is_written():
         action="Testing JSON alert output"
     )
 
-    content = Path("logs/alerts.jsonl").read_text().strip()
+    content = Path(os.environ["ZT_LOG_DIR"], "alerts.jsonl").read_text().strip()
     alert = json.loads(content)
 
     assert alert["threat"] == "Test Alert"

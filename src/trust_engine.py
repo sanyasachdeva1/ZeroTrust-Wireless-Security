@@ -1,21 +1,27 @@
 import json
+import os
 from pathlib import Path
 
-from response_engine import isolate_device
 from logger import log_alert
+from response_engine import isolate_device
 
 
-CONFIG_FILE = Path("config/trusted_devices.json")
+DEFAULT_CONFIG_FILE = Path("config/trusted_devices.json")
+
+
+def config_file():
+    return Path(os.environ.get("ZT_TRUST_CONFIG_FILE", DEFAULT_CONFIG_FILE))
 
 
 def load_config():
-    with open(CONFIG_FILE, "r") as file:
+    with open(config_file(), "r") as file:
         return json.load(file)
 
 
 def save_config(data):
-    with open(CONFIG_FILE, "w") as file:
+    with open(config_file(), "w") as file:
         json.dump(data, file, indent=2)
+        file.write("\n")
 
 
 def get_trusted_device(mac):
@@ -41,6 +47,7 @@ def evaluate_trust(mac, reason="Suspicious wireless activity detected"):
     trust_threshold = settings.get("trust_threshold", 50)
     trust_penalty = settings.get("trust_penalty", 30)
     auto_isolate = settings.get("auto_isolate", True)
+    persist_trust_updates = settings.get("persist_trust_updates", True)
 
     for device in data.get("trusted_devices", []):
         if device["mac"].upper() == mac.upper():
@@ -70,7 +77,8 @@ def evaluate_trust(mac, reason="Suspicious wireless activity detected"):
                 isolate_device(mac)
                 device["isolated"] = True
 
-            save_config(data)
+            if persist_trust_updates:
+                save_config(data)
             return
 
     log_alert(

@@ -2,12 +2,15 @@
   "security_settings": {
     "trust_threshold": 50,
     "trust_penalty": 30,
-    "auto_isolate": true
+    "auto_isolate": true,
+    "persist_trust_updates": true
   },
   "trusted_ssids": [
     {
       "ssid": "Cisco-Corp-WiFi",
-      "bssid": "AA:BB:CC:DD:EE:99"
+      "bssids": [
+        "AA:BB:CC:DD:EE:99"
+      ]
     }
   ],
   "trusted_devices": [

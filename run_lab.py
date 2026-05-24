@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -95,9 +96,11 @@ def run_simulation():
     simulate_evil_twin()
     simulate_beacon_flood()
 
+    log_dir = Path(os.environ.get("ZT_LOG_DIR", "logs"))
+
     print("[*] Simulation complete.")
-    print("[*] Review SOC logs: logs/alerts.log")
-    print("[*] Review JSON alerts: logs/alerts.jsonl")
+    print(f"[*] Review SOC logs: {log_dir / 'alerts.log'}")
+    print(f"[*] Review JSON alerts: {log_dir / 'alerts.jsonl'}")
 
 
 if __name__ == "__main__":

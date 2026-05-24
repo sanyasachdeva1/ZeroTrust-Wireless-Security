@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -8,23 +9,21 @@ from attack_detector import analyze_packet
 
 
 def test_unknown_mac_generates_alert():
-    Path("logs").mkdir(exist_ok=True)
-    Path("logs/alerts.log").write_text("")
-    Path("logs/alerts.jsonl").write_text("")
-
-    packet = (
-        RadioTap()
-        / Dot11(
-            type=2,
-            subtype=0,
-            addr1="AA:BB:CC:DD:EE:02",
-            addr2="DE:AD:BE:EF:00:01",
-            addr3="AA:BB:CC:DD:EE:99",
+    for _ in range(2):
+        packet = (
+            RadioTap()
+            / Dot11(
+                type=2,
+                subtype=0,
+                addr1="AA:BB:CC:DD:EE:02",
+                addr2="DE:AD:BE:EF:00:01",
+                addr3="AA:BB:CC:DD:EE:99",
+            )
         )
-    )
 
-    analyze_packet(packet)
+        analyze_packet(packet)
 
-    log_content = Path("logs/alerts.log").read_text()
+    log_content = Path(os.environ["ZT_LOG_DIR"], "alerts.log").read_text()
 
     assert "Unknown Wireless Device" in log_content
+    assert log_content.count("Unknown Wireless Device") == 1
