@@ -40,16 +40,24 @@ The system follows a simple blue-team security pipeline:
 
 ```mermaid
 flowchart LR
-    A[Simulated 802.11 Packet] --> B[Attack Detector]
-    B --> C[Deauth Detection]
-    C --> D[SOC-style Alert Logging]
-    C --> E[Zero Trust Evaluation]
-    E --> F[Trust Score Reduction]
-    F --> G{Below Trust Threshold?}
-    G -->|Yes| H[Simulated Device Isolation]
-    G -->|No| I[Continue Monitoring]
-    H --> J[logs/alerts.log]
-    D --> J
+    A[Simulated Wireless Input] --> B[Attack Detector]
+    B --> C[Deauth Flood Detection]
+    B --> D[Unknown MAC Detection]
+    B --> E[Evil Twin SSID Detection]
+    B --> F[Beacon Flood Detection]
+    C --> G[Zero Trust Evaluation]
+    D --> G
+    E --> H[SOC-style Alert Logging]
+    F --> H
+    G --> I[Trust Score Reduction]
+    I --> J{Below Trust Threshold?}
+    J -->|Yes| K[Simulated NAC Quarantine]
+    J -->|Yes| L[Simulated Firewall Block]
+    J -->|No| M[Continue Monitoring]
+    K --> N[logs/alerts.log]
+    L --> N
+    H --> N
+    N --> O[logs/alerts.jsonl]
 ```
 
 ---
@@ -58,9 +66,11 @@ flowchart LR
 
 | Detection | Tactic / Concept | Why it matters |
 |---|---|---|
-| 802.11 Deauthentication Attack | Impact / Network Denial of Service concept | Deauth frames can force wireless clients to disconnect and disrupt availability |
-| Unknown Wireless Device | Initial Access / Rogue Device concept | Unknown devices violate identity-based trust assumptions |
-| Trust Score Degradation | Continuous Verification Failure | Repeated suspicious behavior lowers device trust and can trigger response |
+| 802.11 Deauthentication Flood | Impact / Network Denial of Service concept | Repeated deauthentication frames can disrupt wireless availability by forcing clients to disconnect |
+| Unknown Wireless Device | Initial Access / Rogue Device concept | A device not present in the trusted inventory violates Zero Trust access assumptions |
+| Evil Twin SSID | Credential Access / Rogue Access Point concept | A malicious AP imitating a trusted SSID can trick users into connecting and expose credentials or traffic |
+| Beacon Flood | Impact / Wireless DoS concept | Excessive beacon frames can create noise, degrade visibility, and disrupt normal wireless operations |
+| Trust Score Degradation | Continuous Verification / Policy Enforcement concept | Repeated suspicious behavior lowers device trust and can trigger containment |
 
 ---
 
@@ -145,13 +155,28 @@ cat logs/alerts.jsonl
 python3 attacks/simulate_deauth.py
 ```
 
-```md
 ## Optional: Analyze a PCAP File
 
 The project also supports offline packet analysis using Scapy’s `rdpcap`.
 
 ```bash
 python3 src/pcap_analyzer.py --pcap sample-data/wireless_sample.pcap
+```
+
+This allows the detection engine to process captured packets instead of only simulated packets.
+
+> Note: This repository does not include a sample PCAP file yet. Add your own authorized wireless capture file before using this command.
+
+
+## Tests and CI
+
+Run local tests:
+
+```bash
+pytest
+```
+
+This project uses GitHub Actions to validate Python syntax and run automated tests on every push and pull request.
 
 ---
 
