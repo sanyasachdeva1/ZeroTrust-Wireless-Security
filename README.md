@@ -136,7 +136,7 @@ The latest demo run shows the complete wireless detection and response workflow:
 - SOC-style alert generation in `logs/alerts.log`
 - Structured JSONL alert generation in `logs/alerts.jsonl`
 
-  ### Sample SOC Alert
+### Sample SOC Alert
 
 ```text
 Severity=HIGH | Threat=Wireless Deauthentication Flood | MAC=AA:BB:CC:DD:EE:01 | MITRE=Impact / Network DoS concept | Action=Threshold exceeded
