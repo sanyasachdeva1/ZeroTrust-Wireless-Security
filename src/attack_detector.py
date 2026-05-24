@@ -1,5 +1,7 @@
+import json
 from collections import defaultdict, deque
 from datetime import datetime, timedelta, UTC
+from pathlib import Path
 
 from scapy.all import Dot11, Dot11Beacon, Dot11Deauth, Dot11ProbeReq
 
@@ -7,14 +9,15 @@ from trust_engine import evaluate_trust, load_config
 from logger import log_alert
 
 
-DEAUTH_WINDOW_SECONDS = 60
-DEAUTH_THRESHOLD = 5
-BEACON_WINDOW_SECONDS = 60
-BEACON_THRESHOLD = 10
+DETECTION_RULES_FILE = Path("config/detection_rules.json")
 
 deauth_events = defaultdict(deque)
 beacon_events = defaultdict(deque)
 
+
+def load_detection_rules():
+    with open(DETECTION_RULES_FILE, "r") as file:
+        return json.load(file)
 
 def _now():
 	return datetime.now(UTC)
@@ -42,6 +45,7 @@ def _get_trusted_ssids():
     }
 
 
+
 def detect_unknown_mac(packet):
     if not packet.haslayer(Dot11):
         return
@@ -66,41 +70,109 @@ def detect_unknown_mac(packet):
             }
         )
 
+def detect_unknown_mac(packet):
+    if not packet.haslayer(Dot11):
+        return
+
+    src_mac = packet.addr2
+
+    if not src_mac:
+        return
+
+    trusted_macs = _get_trusted_macs()
+
+    if src_mac.upper() not in trusted_macs and src_mac.lower() != "ff:ff:ff:ff:ff:ff":
+        log_alert(
+            threat="Unknown Wireless Device",
+            mac=src_mac,
+            severity="HIGH",
+            mitre_technique="Initial Access / Rogue Device concept",
+            action="Flagged unknown device",
+            details={
+                "source_mac": src_mac,
+                "zero_trust_decision": "not_trusted"
+            }
+        )
+
+def detect_unknown_mac(packet):
+    rules = load_detection_rules()
+    rule = rules.get("unknown_mac", {})
+
+    if not rule.get("enabled", True):
+        return
+
+    if not packet.haslayer(Dot11):
+        return
+
+    src_mac = packet.addr2
+
+    if not src_mac:
+        return
+
+    trusted_macs = _get_trusted_macs()
+
+    if src_mac.upper() not in trusted_macs and src_mac.lower() != "ff:ff:ff:ff:ff:ff":
+        log_alert(
+            threat="Unknown Wireless Device",
+            mac=src_mac,
+            severity=rule.get("severity", "HIGH"),
+            mitre_technique=rule.get("mitre_technique", "Initial Access / Rogue Device concept"),
+            action="Flagged unknown device",
+            details={
+                "source_mac": src_mac,
+                "zero_trust_decision": "not_trusted"
+            }
+        )
 
 def detect_deauth_flood(packet):
+    rules = load_detection_rules()
+    rule = rules.get("deauth_flood", {})
+
+    if not rule.get("enabled", True):
+        return
+
     if not packet.haslayer(Dot11Deauth):
         return
 
     src_mac = packet.addr2 or "UNKNOWN"
     target_mac = packet.addr1 or "UNKNOWN"
 
+    window_seconds = rule.get("window_seconds", 60)
+    threshold = rule.get("threshold", 5)
+
     deauth_events[src_mac].append(_now())
-    _cleanup_old_events(deauth_events[src_mac], DEAUTH_WINDOW_SECONDS)
+    _cleanup_old_events(deauth_events[src_mac], window_seconds)
 
     event_count = len(deauth_events[src_mac])
 
-    if event_count >= DEAUTH_THRESHOLD:
+    if event_count >= threshold:
         log_alert(
             threat="Wireless Deauthentication Flood",
             mac=src_mac,
-            severity="HIGH",
-            mitre_technique="Impact / Network DoS concept",
+            severity=rule.get("severity", "HIGH"),
+            mitre_technique=rule.get("mitre_technique", "Impact / Network DoS concept"),
             action="Threshold exceeded",
             details={
                 "source_mac": src_mac,
                 "target_mac": target_mac,
                 "event_count": event_count,
-                "window_seconds": DEAUTH_WINDOW_SECONDS
+                "threshold": threshold,
+                "window_seconds": window_seconds
             }
         )
 
         evaluate_trust(
             src_mac,
-            reason=f"Deauthentication flood detected: {event_count} events in {DEAUTH_WINDOW_SECONDS}s"
+            reason=f"Deauthentication flood detected: {event_count} events in {window_seconds}s"
         )
 
-
 def detect_evil_twin(packet):
+    rules = load_detection_rules()
+    rule = rules.get("evil_twin", {})
+
+    if not rule.get("enabled", True):
+        return
+
     if not packet.haslayer(Dot11Beacon):
         return
 
@@ -122,8 +194,8 @@ def detect_evil_twin(packet):
         log_alert(
             threat="Possible Evil Twin Access Point",
             mac=bssid,
-            severity="HIGH",
-            mitre_technique="Credential Access / Rogue AP concept",
+            severity=rule.get("severity", "HIGH"),
+            mitre_technique=rule.get("mitre_technique", "Credential Access / Rogue AP concept"),
             action="SSID matches trusted network but BSSID is untrusted",
             details={
                 "ssid": ssid,
@@ -134,32 +206,47 @@ def detect_evil_twin(packet):
 
 
 def detect_beacon_flood(packet):
+    rules = load_detection_rules()
+    rule = rules.get("beacon_flood", {})
+
+    if not rule.get("enabled", True):
+        return
+
     if not packet.haslayer(Dot11Beacon):
         return
 
     bssid = packet.addr3 or "UNKNOWN"
 
+    window_seconds = rule.get("window_seconds", 60)
+    threshold = rule.get("threshold", 10)
+
     beacon_events[bssid].append(_now())
-    _cleanup_old_events(beacon_events[bssid], BEACON_WINDOW_SECONDS)
+    _cleanup_old_events(beacon_events[bssid], window_seconds)
 
     event_count = len(beacon_events[bssid])
 
-    if event_count >= BEACON_THRESHOLD:
+    if event_count >= threshold:
         log_alert(
             threat="Beacon Flood Detected",
             mac=bssid,
-            severity="MEDIUM",
-            mitre_technique="Impact / Wireless DoS concept",
+            severity=rule.get("severity", "MEDIUM"),
+            mitre_technique=rule.get("mitre_technique", "Impact / Wireless DoS concept"),
             action="Beacon threshold exceeded",
             details={
                 "bssid": bssid,
                 "event_count": event_count,
-                "window_seconds": BEACON_WINDOW_SECONDS
+                "threshold": threshold,
+                "window_seconds": window_seconds
             }
         )
 
-
 def detect_probe_request(packet):
+    rules = load_detection_rules()
+    rule = rules.get("probe_request", {})
+
+    if not rule.get("enabled", True):
+        return
+
     if not packet.haslayer(Dot11ProbeReq):
         return
 
@@ -168,8 +255,8 @@ def detect_probe_request(packet):
     log_alert(
         threat="Probe Request Observed",
         mac=src_mac,
-        severity="LOW",
-        mitre_technique="Discovery / Wireless Recon concept",
+        severity=rule.get("severity", "LOW"),
+        mitre_technique=rule.get("mitre_technique", "Discovery / Wireless Recon concept"),
         action="Logged probe request",
         details={
             "source_mac": src_mac

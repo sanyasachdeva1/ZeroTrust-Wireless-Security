@@ -15,8 +15,8 @@
       "mac": "AA:BB:CC:DD:EE:01",
       "owner": "Employee-Laptop",
       "device_type": "Corporate Laptop",
-      "trust_score": 70,
-      "isolated": true
+      "trust_score": 100,
+      "isolated": false
     },
     {
       "mac": "AA:BB:CC:DD:EE:02",

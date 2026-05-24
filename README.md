@@ -24,6 +24,8 @@ The lab demonstrates how enterprise wireless security can combine **identity-bas
 - Optional offline PCAP analysis using `src/pcap_analyzer.py`
 - Automated tests using `pytest`
 - GitHub Actions CI workflow for syntax checks and test execution
+- Detection thresholds managed through `config/detection_rules.json`
+- Sample SOC and JSONL outputs available in `sample-output/`
 
 ---
 
@@ -169,6 +171,12 @@ cat logs/alerts.log
 cat logs/alerts.jsonl
 ```
 
+### 6. View sample outputs
+
+```bash
+cat sample-output/alerts_sample.log
+cat sample-output/alerts_sample.jsonl
+
 ---
 
 ## Optional: Run the Attack Simulation Directly
@@ -214,6 +222,30 @@ reports/sample_incident_report.md
 ```
 
 The report documents a simulated wireless deauthentication flood, Zero Trust trust-score decisioning, and simulated containment actions.
+
+---
+
+````md
+## Detection Logic Documentation
+
+Detailed detection logic, false positive notes, and tuning guidance are available at:
+
+```bash
+docs/detection_logic.md
+```
+
+---
+
+## Real-World Mapping
+
+In a production wireless security environment, this workflow could map to:
+
+- Cisco ISE for NAC quarantine
+- Wireless LAN Controller logs for client and AP behavior
+- SIEM ingestion for JSONL alerts
+- SOAR workflow for containment
+- Firewall policy updates for blocking suspicious devices
+- PCAP analysis for incident investigation
 
 ---
 
