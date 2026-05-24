@@ -18,11 +18,21 @@ def save_config(data):
         json.dump(data, file, indent=2)
 
 
-def evaluate_trust(mac):
+def get_trusted_device(mac):
+    data = load_config()
+
+    for device in data.get("trusted_devices", []):
+        if device["mac"].upper() == mac.upper():
+            return device
+
+    return None
+
+
+def evaluate_trust(mac, reason="Suspicious wireless activity detected"):
     """
     Reduce trust score for a suspicious device.
-    If the device is unknown, log it as a Zero Trust violation.
-    If trust score falls below threshold, trigger isolation.
+    If device is unknown, log it as a Zero Trust violation.
+    If score falls below threshold, trigger simulated containment once.
     """
 
     data = load_config()
@@ -32,24 +42,33 @@ def evaluate_trust(mac):
     trust_penalty = settings.get("trust_penalty", 30)
     auto_isolate = settings.get("auto_isolate", True)
 
-    for device in data["trusted_devices"]:
+    for device in data.get("trusted_devices", []):
         if device["mac"].upper() == mac.upper():
-            device["trust_score"] = max(device["trust_score"] - trust_penalty, 0)
+            previous_score = device.get("trust_score", 100)
+            new_score = max(previous_score - trust_penalty, 0)
+            device["trust_score"] = new_score
 
             print(
                 f"[!] Trust score reduced for {mac}. "
-                f"Current score: {device['trust_score']}"
+                f"Previous score: {previous_score}, Current score: {new_score}"
             )
 
             log_alert(
                 threat="Trust Score Reduced",
                 mac=mac,
-                action=f"Trust score now {device['trust_score']}",
-                severity="MEDIUM"
+                severity="MEDIUM",
+                action=f"Trust score changed from {previous_score} to {new_score}",
+                details={
+                    "previous_score": previous_score,
+                    "current_score": new_score,
+                    "reason": reason,
+                    "threshold": trust_threshold
+                }
             )
 
-            if auto_isolate and device["trust_score"] < trust_threshold:
+            if auto_isolate and new_score < trust_threshold and not device.get("isolated", False):
                 isolate_device(mac)
+                device["isolated"] = True
 
             save_config(data)
             return
@@ -57,6 +76,10 @@ def evaluate_trust(mac):
     log_alert(
         threat="Unknown Wireless Device",
         mac=mac,
+        severity="HIGH",
         action="Device not found in trusted inventory",
-        severity="HIGH"
-)
+        details={
+            "reason": "MAC address not present in trusted device inventory",
+            "zero_trust_decision": "deny_or_quarantine"
+        }
+    )

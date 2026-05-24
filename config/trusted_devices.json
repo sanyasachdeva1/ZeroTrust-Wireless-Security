@@ -4,18 +4,26 @@
     "trust_penalty": 30,
     "auto_isolate": true
   },
+  "trusted_ssids": [
+    {
+      "ssid": "Cisco-Corp-WiFi",
+      "bssid": "AA:BB:CC:DD:EE:99"
+    }
+  ],
   "trusted_devices": [
     {
       "mac": "AA:BB:CC:DD:EE:01",
       "owner": "Employee-Laptop",
       "device_type": "Corporate Laptop",
-      "trust_score": 100
+      "trust_score": 10,
+      "isolated": true
     },
     {
       "mac": "AA:BB:CC:DD:EE:02",
       "owner": "Corporate-Mobile",
       "device_type": "Managed Mobile",
-      "trust_score": 100
+      "trust_score": 100,
+      "isolated": false
     }
   ]
 }
