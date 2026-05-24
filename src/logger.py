@@ -29,6 +29,8 @@ def log_alert(
     severity="HIGH",
     mitre_technique=None,
     action="Logged",
+    risk_score=None,
+    confidence=None,
     details=None,
 ):
     """
@@ -45,14 +47,18 @@ def log_alert(
         "mac": mac,
         "mitre_technique": mitre_technique or "N/A",
         "action": action,
+        "risk_score": risk_score,
+        "confidence": confidence,
         "details": details or {}
     }
+    risk_text = risk_score if risk_score is not None else "N/A"
 
     soc_log_entry = (
         f"{alert['timestamp']} | "
         f"Severity={alert['severity']} | "
         f"Threat={alert['threat']} | "
         f"MAC={alert['mac']} | "
+        f"Risk={risk_text} | "
         f"MITRE={alert['mitre_technique']} | "
         f"Action={alert['action']}\n"
     )

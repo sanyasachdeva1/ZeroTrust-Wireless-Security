@@ -34,6 +34,7 @@ jobs:
           python -m py_compile run_lab.py
           python -m py_compile src/attack_detector.py
           python -m py_compile src/logger.py
+          python -m py_compile src/risk_engine.py
           python -m py_compile src/trust_engine.py
           python -m py_compile src/response_engine.py
           python -m py_compile src/pcap_analyzer.py

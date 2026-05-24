@@ -7,6 +7,7 @@ from pathlib import Path
 from scapy.all import Dot11, Dot11Beacon, Dot11Deauth, Dot11Elt, Dot11ProbeReq
 
 from logger import log_alert
+from risk_engine import score_event, severity_from_score
 from trust_engine import evaluate_trust, load_config
 
 
@@ -76,7 +77,9 @@ def _get_trusted_ssids():
             bssids.append(item["bssid"])
 
         trusted_ssids[ssid] = {
-            "bssids": {_normalize_mac(bssid) for bssid in bssids if bssid}
+            "bssids": {_normalize_mac(bssid) for bssid in bssids if bssid},
+            "channel": item.get("channel"),
+            "security": item.get("security"),
         }
 
     return trusted_ssids
@@ -119,6 +122,35 @@ def _get_ssid(packet):
         return None
 
 
+def _get_channel(packet):
+    try:
+        channel_layer = packet.getlayer(Dot11Elt, ID=3)
+        if channel_layer and channel_layer.info:
+            return int(channel_layer.info[0])
+    except Exception:
+        return None
+
+    return None
+
+
+def _get_security(packet):
+    try:
+        if packet.getlayer(Dot11Elt, ID=48):
+            return "WPA2"
+    except Exception:
+        pass
+
+    try:
+        capability = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}")
+    except Exception:
+        capability = ""
+
+    if "privacy" in capability.lower():
+        return "WEP_OR_WPA"
+
+    return "OPEN"
+
+
 def detect_unknown_mac(packet, rules=None):
     rules = rules or load_detection_rules()
     rule = _get_rule(rules, "unknown_mac")
@@ -138,6 +170,8 @@ def detect_unknown_mac(packet, rules=None):
 
     if _normalize_mac(src_mac) not in trusted_macs:
         cooldown_seconds = rule.get("cooldown_seconds", 60)
+        severity = rule.get("severity", "HIGH")
+        risk_score = score_event(severity)
 
         if not _should_emit_alert("unknown_mac", src_mac, cooldown_seconds):
             return
@@ -145,9 +179,11 @@ def detect_unknown_mac(packet, rules=None):
         log_alert(
             threat="Unknown Wireless Device",
             mac=src_mac,
-            severity=rule.get("severity", "HIGH"),
+            severity=severity,
             mitre_technique=rule.get("mitre_technique", "Initial Access / Rogue Device concept"),
             action="Flagged unknown device",
+            risk_score=risk_score,
+            confidence="medium",
             details={
                 "source_mac": src_mac,
                 "zero_trust_decision": "not_trusted",
@@ -179,12 +215,17 @@ def detect_deauth_flood(packet, rules=None):
     event_count = len(deauth_events[src_mac])
 
     if event_count >= threshold and _should_emit_alert("deauth_flood", src_mac, cooldown_seconds):
+        severity = rule.get("severity", "HIGH")
+        risk_score = score_event(severity, [min(event_count - threshold, 10)])
+
         log_alert(
             threat="Wireless Deauthentication Flood",
             mac=src_mac,
-            severity=rule.get("severity", "HIGH"),
+            severity=severity_from_score(risk_score),
             mitre_technique=rule.get("mitre_technique", "Impact / Network DoS concept"),
             action="Threshold exceeded",
+            risk_score=risk_score,
+            confidence="high",
             details={
                 "source_mac": src_mac,
                 "target_mac": target_mac,
@@ -198,6 +239,7 @@ def detect_deauth_flood(packet, rules=None):
         evaluate_trust(
             src_mac,
             reason=f"Deauthentication flood detected: {event_count} events in {window_seconds}s",
+            risk_score=risk_score,
         )
 
 
@@ -213,6 +255,8 @@ def detect_evil_twin(packet, rules=None):
 
     ssid = _get_ssid(packet)
     bssid = packet.addr3
+    channel = _get_channel(packet)
+    security = _get_security(packet)
 
     if not ssid or not bssid:
         return
@@ -220,22 +264,52 @@ def detect_evil_twin(packet, rules=None):
     trusted_ssids = _get_trusted_ssids()
     trusted_network = trusted_ssids.get(ssid)
 
-    if trusted_network and _normalize_mac(bssid) not in trusted_network["bssids"]:
+    if not trusted_network:
+        return
+
+    indicators = []
+
+    untrusted_bssid = _normalize_mac(bssid) not in trusted_network["bssids"]
+
+    if untrusted_bssid:
+        indicators.append("untrusted_bssid")
+
+    if untrusted_bssid and trusted_network.get("channel") and channel:
+        if channel != trusted_network["channel"]:
+            indicators.append("channel_mismatch")
+
+    if untrusted_bssid and trusted_network.get("security") and security:
+        if security != trusted_network["security"]:
+            indicators.append("security_mismatch")
+
+    min_indicators = rule.get("min_indicators", 1)
+
+    if len(indicators) >= min_indicators:
         cooldown_seconds = rule.get("cooldown_seconds", 60)
 
         if not _should_emit_alert("evil_twin", f"{ssid}:{bssid}", cooldown_seconds):
             return
 
+        severity = rule.get("severity", "HIGH")
+        risk_score = score_event(severity, [10 * (len(indicators) - 1)])
+
         log_alert(
             threat="Possible Evil Twin Access Point",
             mac=bssid,
-            severity=rule.get("severity", "HIGH"),
+            severity=severity_from_score(risk_score),
             mitre_technique=rule.get("mitre_technique", "Credential Access / Rogue AP concept"),
-            action="SSID matches trusted network but BSSID is untrusted",
+            action="Trusted SSID observed with suspicious AP attributes",
+            risk_score=risk_score,
+            confidence="high" if len(indicators) > 1 else "medium",
             details={
                 "ssid": ssid,
                 "observed_bssid": bssid,
                 "trusted_bssids": sorted(trusted_network["bssids"]),
+                "observed_channel": channel,
+                "expected_channel": trusted_network.get("channel"),
+                "observed_security": security,
+                "expected_security": trusted_network.get("security"),
+                "indicators": indicators,
                 "cooldown_seconds": cooldown_seconds,
             },
         )
@@ -263,12 +337,17 @@ def detect_beacon_flood(packet, rules=None):
     event_count = len(beacon_events[bssid])
 
     if event_count >= threshold and _should_emit_alert("beacon_flood", bssid, cooldown_seconds):
+        severity = rule.get("severity", "MEDIUM")
+        risk_score = score_event(severity, [min(event_count - threshold, 10)])
+
         log_alert(
             threat="Beacon Flood Detected",
             mac=bssid,
-            severity=rule.get("severity", "MEDIUM"),
+            severity=severity_from_score(risk_score),
             mitre_technique=rule.get("mitre_technique", "Impact / Wireless DoS concept"),
             action="Beacon threshold exceeded",
+            risk_score=risk_score,
+            confidence="medium",
             details={
                 "bssid": bssid,
                 "event_count": event_count,
@@ -290,13 +369,17 @@ def detect_probe_request(packet, rules=None):
         return
 
     src_mac = packet.addr2 or "UNKNOWN"
+    severity = rule.get("severity", "LOW")
+    risk_score = score_event(severity)
 
     log_alert(
         threat="Probe Request Observed",
         mac=src_mac,
-        severity=rule.get("severity", "LOW"),
+        severity=severity,
         mitre_technique=rule.get("mitre_technique", "Discovery / Wireless Recon concept"),
         action="Logged probe request",
+        risk_score=risk_score,
+        confidence="low",
         details={
             "source_mac": src_mac,
         },

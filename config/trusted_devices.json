@@ -3,14 +3,18 @@
     "trust_threshold": 50,
     "trust_penalty": 30,
     "auto_isolate": true,
-    "persist_trust_updates": true
+    "persist_trust_updates": true,
+    "response_mode": "simulate",
+    "isolation_min_risk_score": 75
   },
   "trusted_ssids": [
     {
       "ssid": "Cisco-Corp-WiFi",
       "bssids": [
         "AA:BB:CC:DD:EE:99"
-      ]
+      ],
+      "channel": 6,
+      "security": "WPA2"
     }
   ],
   "trusted_devices": [

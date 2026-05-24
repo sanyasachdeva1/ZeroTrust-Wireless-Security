@@ -63,6 +63,7 @@ def simulate_evil_twin():
         )
         / Dot11Beacon()
         / Dot11Elt(ID="SSID", info="Cisco-Corp-WiFi")
+        / Dot11Elt(ID="DSset", info=bytes([11]))
     )
 
     analyze_packet(packet)

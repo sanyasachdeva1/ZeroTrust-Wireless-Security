@@ -34,7 +34,7 @@ def get_trusted_device(mac):
     return None
 
 
-def evaluate_trust(mac, reason="Suspicious wireless activity detected"):
+def evaluate_trust(mac, reason="Suspicious wireless activity detected", risk_score=None):
     """
     Reduce trust score for a suspicious device.
     If device is unknown, log it as a Zero Trust violation.
@@ -48,6 +48,8 @@ def evaluate_trust(mac, reason="Suspicious wireless activity detected"):
     trust_penalty = settings.get("trust_penalty", 30)
     auto_isolate = settings.get("auto_isolate", True)
     persist_trust_updates = settings.get("persist_trust_updates", True)
+    response_mode = settings.get("response_mode", "simulate")
+    isolation_min_risk_score = settings.get("isolation_min_risk_score", 80)
 
     for device in data.get("trusted_devices", []):
         if device["mac"].upper() == mac.upper():
@@ -65,15 +67,26 @@ def evaluate_trust(mac, reason="Suspicious wireless activity detected"):
                 mac=mac,
                 severity="MEDIUM",
                 action=f"Trust score changed from {previous_score} to {new_score}",
+                risk_score=risk_score,
+                confidence="medium",
                 details={
                     "previous_score": previous_score,
                     "current_score": new_score,
                     "reason": reason,
-                    "threshold": trust_threshold
+                    "threshold": trust_threshold,
+                    "response_mode": response_mode,
                 }
             )
 
-            if auto_isolate and new_score < trust_threshold and not device.get("isolated", False):
+            should_isolate = (
+                auto_isolate
+                and response_mode == "simulate"
+                and new_score < trust_threshold
+                and (risk_score is None or risk_score >= isolation_min_risk_score)
+                and not device.get("isolated", False)
+            )
+
+            if should_isolate:
                 isolate_device(mac)
                 device["isolated"] = True
 
@@ -86,6 +99,8 @@ def evaluate_trust(mac, reason="Suspicious wireless activity detected"):
         mac=mac,
         severity="HIGH",
         action="Device not found in trusted inventory",
+        risk_score=risk_score,
+        confidence="medium",
         details={
             "reason": "MAC address not present in trusted device inventory",
             "zero_trust_decision": "deny_or_quarantine"

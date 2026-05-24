@@ -15,16 +15,16 @@ The project uses safe in-memory packet simulations. It does not transmit attack 
 - Possible evil twin access points
 - Beacon floods
 - Probe requests
-- Trust score drops that can trigger simulated isolation
+- Risk-scored alerts and guarded simulated isolation
 
 ## How It Works
 
 1. Simulated packets or offline PCAP packets are sent to the detector.
 2. Detection rules are loaded from `config/detection_rules.json`.
-3. Trusted devices and SSIDs are loaded from `config/trusted_devices.json`.
+3. Trusted devices and SSID/BSSID expectations are loaded from `config/trusted_devices.json`.
 4. Alerts are written to `logs/alerts.log` and `logs/alerts.jsonl`.
 5. Suspicious trusted devices lose trust score.
-6. If a device drops below the trust threshold, simulated containment is logged.
+6. If risk and trust thresholds allow it, simulated containment is logged.
 
 ## Run The Lab
 
@@ -46,7 +46,7 @@ cat logs/alerts.jsonl
 python3 src/pcap_analyzer.py --pcap path/to/wireless_capture.pcap
 ```
 
-Only analyze captures you are authorized to use.
+The analyzer also handles non-wireless PCAPs and reports when no 802.11 frames are present. Only analyze captures you are authorized to use.
 
 ## Tests
 
@@ -63,7 +63,7 @@ Detection thresholds, severities, and cooldowns live in:
 config/detection_rules.json
 ```
 
-Trusted devices, trusted SSIDs/BSSIDs, trust penalties, and isolation behavior live in:
+Trusted devices, trusted SSID/BSSID expectations, trust penalties, and response safety controls live in:
 
 ```text
 config/trusted_devices.json

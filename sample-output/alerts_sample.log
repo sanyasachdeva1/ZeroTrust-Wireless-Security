@@ -1,5 +1,7 @@
-2026-05-22T21:07:09Z | Severity=HIGH | Threat=Wireless Deauthentication Flood | MAC=AA:BB:CC:DD:EE:01 | MITRE=Impact / Network DoS concept | Action=Threshold exceeded
-2026-05-22T21:07:09Z | Severity=MEDIUM | Threat=Trust Score Reduced | MAC=AA:BB:CC:DD:EE:01 | MITRE=N/A | Action=Trust score changed from 100 to 70
-2026-05-22T21:07:10Z | Severity=HIGH | Threat=Possible Evil Twin Access Point | MAC=11:22:33:44:55:66 | MITRE=Credential Access / Rogue AP concept | Action=SSID matches trusted network but BSSID is untrusted
-2026-05-22T21:07:11Z | Severity=MEDIUM | Threat=Beacon Flood Detected | MAC=22:33:44:55:66:77 | MITRE=Impact / Wireless DoS concept | Action=Beacon threshold exceeded
-2026-05-22T21:07:12Z | Severity=CRITICAL | Threat=Device Isolation Triggered | MAC=AA:BB:CC:DD:EE:01 | MITRE=N/A | Action=Simulated NAC quarantine and firewall block
+2026-05-24T18:16:10.499936+00:00 | Severity=HIGH | Threat=Wireless Deauthentication Flood | MAC=AA:BB:CC:DD:EE:01 | Risk=75 | MITRE=Impact / Network DoS concept | Action=Threshold exceeded
+2026-05-24T18:16:10.500162+00:00 | Severity=MEDIUM | Threat=Trust Score Reduced | MAC=AA:BB:CC:DD:EE:01 | Risk=75 | MITRE=N/A | Action=Trust score changed from 100 to 70
+2026-05-24T18:16:10.500533+00:00 | Severity=HIGH | Threat=Unknown Wireless Device | MAC=DE:AD:BE:EF:00:01 | Risk=75 | MITRE=Initial Access / Rogue Device concept | Action=Flagged unknown device
+2026-05-24T18:16:10.501084+00:00 | Severity=HIGH | Threat=Unknown Wireless Device | MAC=11:22:33:44:55:66 | Risk=75 | MITRE=Initial Access / Rogue Device concept | Action=Flagged unknown device
+2026-05-24T18:16:10.501280+00:00 | Severity=CRITICAL | Threat=Possible Evil Twin Access Point | MAC=11:22:33:44:55:66 | Risk=95 | MITRE=Credential Access / Rogue AP concept | Action=Trusted SSID observed with suspicious AP attributes
+2026-05-24T18:16:10.501711+00:00 | Severity=HIGH | Threat=Unknown Wireless Device | MAC=22:33:44:55:66:77 | Risk=75 | MITRE=Initial Access / Rogue Device concept | Action=Flagged unknown device
+2026-05-24T18:16:10.505147+00:00 | Severity=MEDIUM | Threat=Beacon Flood Detected | MAC=22:33:44:55:66:77 | Risk=45 | MITRE=Impact / Wireless DoS concept | Action=Beacon threshold exceeded
