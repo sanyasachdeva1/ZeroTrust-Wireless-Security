@@ -1,4 +1,4 @@
-kname: Python Security Lab Check
+name: Python Security Lab Check
 
 on:
   push:
