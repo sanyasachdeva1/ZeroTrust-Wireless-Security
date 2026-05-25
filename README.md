@@ -11,6 +11,12 @@ The project uses safe in-memory packet simulations. It does not transmit attack 
 
 I built this lab to connect enterprise wireless security concepts with blue-team detection engineering. The goal was to simulate how suspicious 802.11 activity can be detected, scored, logged, and mapped to a Zero Trust response workflow without transmitting real attack traffic.
 
+## What Makes This Different
+
+This project is intentionally built as a defensive blue-team lab, not a wireless attack toolkit. Instead of focusing on exploitation, it shows how wireless signals can flow through detection rules, risk scoring, SOC-style logging, trust-score reduction, and guarded simulated response.
+
+It is small by design: configurable enough to demonstrate real security thinking, but simple enough to read, test, and explain.
+
 ## What It Detects
 
 - Deauthentication floods
