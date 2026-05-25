@@ -4,27 +4,25 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Python Security Lab Check](https://github.com/sanyasachdeva1/ZeroTrust-Wireless-Security/actions/workflows/python-check.yml/badge.svg)](https://github.com/sanyasachdeva1/ZeroTrust-Wireless-Security/actions/workflows/python-check.yml)
 
-A defensive wireless security lab for detecting suspicious 802.11 Wi-Fi activity using Python, Scapy, configurable detection rules, and Zero Trust response logic.
-The project uses safe in-memory packet simulations. It does not transmit attack traffic.
+Defensive wireless security lab that detects suspicious 802.11 Wi-Fi activity using Python, Scapy, configurable detection rules, and Zero Trust response logic.
+The lab safely simulates wireless events in memory and logs SOC-style alerts without transmitting attack traffic.
+> Built to connect enterprise wireless networking experience with blue-team detection engineering.
 
 ## Why I Built This
-
-I built this lab to connect enterprise wireless security concepts with blue-team detection engineering. The goal was to simulate how suspicious 802.11 activity can be detected, scored, logged, and mapped to a Zero Trust response workflow without transmitting real attack traffic.
-
-## What Makes This Different
-
-This project is intentionally built as a defensive blue-team lab, not a wireless attack toolkit. Instead of focusing on exploitation, it shows how wireless signals can flow through detection rules, risk scoring, SOC-style logging, trust-score reduction, and guarded simulated response.
-
-It is small by design: configurable enough to demonstrate real security thinking, but simple enough to read, test, and explain.
+I built this project to bridge enterprise wireless networking and cybersecurity detection engineering.
+The goal was to show how suspicious Wi-Fi behavior can be detected, scored, logged, and mapped to a Zero Trust response workflow in a safe lab environment.
 
 ## What It Detects
 
-- Deauthentication floods
-- Unknown wireless devices
-- Possible evil twin access points
-- Beacon floods
-- Probe requests
-- Risk-scored alerts and guarded simulated isolation
+| Detection | Purpose |
+|---|---|
+| Deauthentication flood | Identify possible wireless disruption behavior |
+| Unknown wireless device | Flag untrusted MAC addresses |
+| Evil twin AP | Detect suspicious SSID/BSSID mismatch behavior |
+| Beacon flood | Identify abnormal beacon activity |
+| Probe requests | Log suspicious discovery behavior |
+| Trust-score changes | Reduce trust based on suspicious activity |
+| Simulated isolation | Log guarded containment decisions |
 
 ## How It Works
 
@@ -51,6 +49,22 @@ flowchart LR
     D --> J
     J --> K[logs/alerts.jsonl]
 ```
+
+## Real-World Mapping
+
+In a production wireless environment, this workflow could map to:
+
+- Wireless LAN Controller telemetry
+- Cisco ISE / NAC policy decisions
+- Rogue AP and client behavior monitoring
+- SIEM alert ingestion
+- SOAR response approval
+- Identity-aware quarantine workflows
+
+## What Makes This Different
+This project is intentionally built as a defensive blue-team lab, not a wireless attack toolkit. Instead of focusing on exploitation, it shows how wireless signals can flow through detection rules, risk scoring, SOC-style logging, trust-score reduction, and guarded simulated response.
+It is small by design: configurable enough to demonstrate real security thinking, but simple enough to read, test, and explain.
+
 
 ## Run The Lab
 
@@ -101,15 +115,16 @@ Trusted devices, trusted SSID/BSSID expectations, trust penalties, and response 
 config/trusted_devices.json
 ```
 
-## Real-World Mapping
+## Resume Relevance
 
-In a production wireless environment, this type of workflow could map to:
+This project demonstrates hands-on experience with:
 
-- Wireless LAN Controller telemetry for client and AP behavior
-- Cisco ISE or NAC policy for identity-aware quarantine
-- SIEM ingestion for SOC monitoring and correlation
-- SOAR workflows for response approval and containment
-- RF analysis tools for validating wireless interference or rogue AP activity
+- Wireless security detection concepts
+- Python and Scapy-based packet simulation
+- Zero Trust trust scoring
+- SOC-style alert logging
+- Detection rules and threshold tuning
+- Network security response workflow design
 
 ## Notes
 
