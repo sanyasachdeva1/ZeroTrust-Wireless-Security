@@ -19,3 +19,15 @@ def test_non_wireless_pcap_reports_zero_dot11_packets(tmp_path, capsys):
 
     assert "Wireless 802.11 packets analyzed: 0" in output
     assert "No 802.11 frames found" in output
+
+
+def test_included_wireless_sample_has_dot11_packets(capsys):
+    sample = Path(__file__).resolve().parents[1] / "sample-data" / "wireless_lab_sample.pcap"
+
+    analyze_pcap(str(sample))
+
+    output = capsys.readouterr().out
+
+    assert "Wireless 802.11 packets analyzed: 7" in output
+    assert "Possible Evil Twin Access Point" in output
+    assert "Wireless Deauthentication Flood" in output

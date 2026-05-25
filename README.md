@@ -66,6 +66,12 @@ cat logs/alerts.jsonl
 python3 src/pcap_analyzer.py --pcap path/to/wireless_capture.pcap
 ```
 
+Try the small included sample:
+
+```bash
+python3 src/pcap_analyzer.py --pcap sample-data/wireless_lab_sample.pcap
+```
+
 The analyzer also handles non-wireless PCAPs and reports when no 802.11 frames are present. Only analyze captures you are authorized to use.
 
 ## Tests

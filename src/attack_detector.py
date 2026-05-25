@@ -56,11 +56,24 @@ def _is_broadcast_mac(mac):
 
 def _get_trusted_macs():
     config = load_config()
-    return {
+    trusted_macs = {
         device["mac"].upper()
         for device in config.get("trusted_devices", [])
         if device.get("mac")
     }
+
+    for item in config.get("trusted_ssids", []):
+        bssids = item.get("bssids", [])
+        if item.get("bssid"):
+            bssids.append(item["bssid"])
+
+        trusted_macs.update(
+            _normalize_mac(bssid)
+            for bssid in bssids
+            if bssid
+        )
+
+    return trusted_macs
 
 
 def _get_trusted_ssids():
